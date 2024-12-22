@@ -42,8 +42,10 @@ public class MainFrame extends JFrame {
 		
 		//add Listeners and buttons
 		btnAdd.addActionListener(e -> new AddEditFrame(this, null));
-		
+		btnEdit.addActionListener(e -> editRecord());
+		btnDelete.addActionListener(e -> deleteRecord());
 		btnRefresh.addActionListener(e -> loadData());
+		
 		
 		panel.add(btnAdd);
 		panel.add(btnEdit);
@@ -56,7 +58,7 @@ public class MainFrame extends JFrame {
 	}
 	
 	// Load data from db
-	private void loadData() {
+	void loadData() {
 		
 		try(Connection conn = DBConnection.getConnection()){
 			
@@ -81,6 +83,38 @@ public class MainFrame extends JFrame {
 		}
 		
 	}
+	
+	// Delete user
+    private void deleteRecord() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a record to delete.");
+            return;
+        }
+
+        int id = (int) model.getValueAt(selectedRow, 0);
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM users WHERE id = ?")) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+
+            loadData(); // Refresh table data
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // edit user
+    private void editRecord() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a record to edit.");
+            return;
+        }
+
+        int id = (int) model.getValueAt(selectedRow, 0);
+        new AddEditFrame(this, id);
+    }
 	
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(()->{

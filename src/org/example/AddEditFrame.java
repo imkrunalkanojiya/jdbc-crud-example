@@ -3,6 +3,7 @@ package org.example;
 import java.awt.GridLayout;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.swing.*;
@@ -40,6 +41,11 @@ public class AddEditFrame extends JFrame {
 		txtAge = new JTextField();
 		add(txtAge);
 		
+		// If editing, load existing data
+        if (userId != null) {
+            loadData(userId);
+        }
+		
 		btnSave = new JButton("Save");
 		add(new JLabel());
 		add(btnSave);
@@ -47,6 +53,22 @@ public class AddEditFrame extends JFrame {
 		
 		setVisible(true);
 	}
+	
+	// Load existing data for editing
+    private void loadData(int userId) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmnt = conn.prepareStatement("SELECT * FROM users WHERE id = ?")) {
+            stmnt.setInt(1, userId);
+            ResultSet rs = stmnt.executeQuery();
+            if (rs.next()) {
+                txtName.setText(rs.getString("name"));
+                txtAge.setText(String.valueOf(rs.getInt("age")));
+                txtEmail.setText(rs.getString("email"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 	
 	private void saveUser() {
 		
@@ -81,6 +103,9 @@ public class AddEditFrame extends JFrame {
 		}catch(SQLException e) {
 			e.printStackTrace();
 		}
+		
+		mainFrame.loadData();
+		dispose();
 	}
 	
 }
