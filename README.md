@@ -2,7 +2,6 @@
 
 ## Features
 - CRUD Users
-- Users show in table
 - Error Handling
 - User validation
 
